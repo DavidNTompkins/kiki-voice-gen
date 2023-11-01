@@ -1,6 +1,6 @@
 # MB-iSTFT-VITS2
-- This is a minor customization off of [fenrir/MB-iSTFT-VITS2](https://github.com/FENRlR/MB-iSTFT-VITS2). This repo is supposed to be private, so I hope you're not reading this?
-- If you are, just go to fenrir's -this is broken probably
+- This is a minor customization off of [fenrir/MB-iSTFT-VITS2](https://github.com/FENRlR/MB-iSTFT-VITS2). This will only be visible shortly, then deleted or made private.
+- just go to fenrir's -this is broken probably
 ## prior Credits
 - [jaywalnut310/vits](https://github.com/jaywalnut310/vits)
 - [p0p4k/vits2_pytorch](https://github.com/p0p4k/vits2_pytorch)
