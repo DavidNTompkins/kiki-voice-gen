@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS, cross_origin
 import os
+from io import BytesIO
 
 import librosa
 import matplotlib.pyplot as plt
@@ -21,10 +22,9 @@ from data_utils import TextAudioLoader, TextAudioCollate, TextAudioSpeakerLoader
 from models import SynthesizerTrn
 from text.symbols import symbols
 from text import text_to_sequence
-import langdetect
-import uuid
 
-from scipy.io.wavfile import write
+from scipy.io.wavfile import write as wav_write
+
 import re
 from scipy import signal
 
@@ -46,45 +46,8 @@ def get_text(text, hps):
         text_norm = commons.intersperse(text_norm, 0)
     text_norm = torch.LongTensor(text_norm)
     return text_norm
-
-
-def langdetector(text):  # from PolyLangVITS
-    try:
-        lang = langdetect.detect(text).lower()
-        if lang == 'ko':
-            return f'[KO]{text}[KO]'
-        elif lang == 'ja':
-            return f'[JA]{text}[JA]'
-        elif lang == 'en':
-            return f'[EN]{text}[EN]'
-        elif lang == 'zh-cn':
-            return f'[ZH]{text}[ZH]'
-        else:
-            return text
-    except Exception as e:
-        return text
-
-
-def vcss(inputstr): 
     fltstr = re.sub(r"[\[\]\(\)\{\}]", "", inputstr)
-    fltstr = langdetector(fltstr)
-    stn_tst = get_text(fltstr, hps)
-
-    speed = 1
-
-    with torch.no_grad():
-        x_tst = stn_tst.to(device).unsqueeze(0)
-        x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).to(device)
-        audio = net_g.infer(x_tst, x_tst_lengths, noise_scale=.667, noise_scale_w=0.8, length_scale=1 / speed)[0][
-                0, 0].data.cpu().float().numpy()
-    
-    return audio
-
-
-
-def vcms(inputstr, sid):
-    fltstr = re.sub(r"[\[\]\(\)\{\}]", "", inputstr)
-    fltstr = langdetector(fltstr)
+    fltstr = f'[EN]{text}[EN]'
     stn_tst = get_text(fltstr, hps)
 
     speed = 1
@@ -149,23 +112,16 @@ def synthesize():
 # Modify vcss to return the output file path
 def vcss(inputstr): 
     fltstr = re.sub(r"[\[\]\(\)\{\}]", "", inputstr)
-    fltstr = langdetector(fltstr) # can be optional depending on cleaner you use
+    fltstr = f'[EN]{text}[EN]'
     stn_tst = get_text(fltstr, hps)
 
     speed = 1
-    output_dir = 'output'
-    sid = 0
     with torch.no_grad():
         x_tst = stn_tst.to(device).unsqueeze(0)
         x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).to(device)
         audio = net_g.infer(x_tst, x_tst_lengths, noise_scale=.667, noise_scale_w=0.8, length_scale=1 / speed)[0][
                 0, 0].data.cpu().float().numpy()
-    write(f'./{output_dir}/output_{sid}.wav', hps.data.sampling_rate, audio)
-    print(f'./{output_dir}/output_{sid}.wav Generated!')
-    
-    output_path = f'./{output_dir}/output_{sid}.wav'
-    write(output_path, hps.data.sampling_rate, audio)
-    return os.path.basename(output_path)
+    return audio
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0', port=5000)
