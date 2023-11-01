@@ -148,7 +148,7 @@ def synthesize():
 
 # Modify vcss to return the output file path
 def vcss(inputstr): 
-        fltstr = re.sub(r"[\[\]\(\)\{\}]", "", inputstr)
+    fltstr = re.sub(r"[\[\]\(\)\{\}]", "", inputstr)
     fltstr = langdetector(fltstr) # can be optional depending on cleaner you use
     stn_tst = get_text(fltstr, hps)
 
